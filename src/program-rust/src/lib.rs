@@ -50,7 +50,7 @@ pub fn process_instruction(
     let mut greeting = solana_program::borsh::try_from_slice_unchecked::<GreetingAccount>(&account.data.borrow())?;
     greeting.counter += 1;
     greeting.experience += 11;
-    // greeting.name = String::from("Test");
+    greeting.name = String::from("Test");
     greeting.serialize(&mut &mut account.data.borrow_mut()[..])?;
     Ok(())
 }

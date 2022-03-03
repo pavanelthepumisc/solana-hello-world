@@ -224,16 +224,18 @@ export async function reportGreetings(): Promise<void> {
   if (accountInfo === null) {
     throw 'Error: cannot find the greeted account';
   }
-  const greeting = borsh.deserialize(
+  const greeting = borsh.deserializeUnchecked(
     GreetingSchema,
     GreetingAccount,
     accountInfo.data,
   );
   console.log(
     greetedPubkey.toBase58(),
-    'has been greeted',
+    'has been greeted ',
+    greeting.counter,
+    "time(s) with experience ",
     greeting.experience,
-    'time(s) by ',
+    'And name ',
     greeting.name,
   );
 }
