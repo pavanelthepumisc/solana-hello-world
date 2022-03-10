@@ -134,6 +134,10 @@ export async function establishPayer(): Promise<void> {
   );
 }
 
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
 /**
  * Check if the hello world BPF program has been deployed
  */
@@ -151,6 +155,9 @@ export async function checkProgram(): Promise<void> {
 
   // Check if the program has been deployed
   const programInfo = await connection.getAccountInfo(programId);
+
+  const slot = await connection.getSlot();
+
   if (programInfo === null) {
     if (fs.existsSync(PROGRAM_SO_PATH)) {
       throw new Error(
@@ -165,7 +172,9 @@ export async function checkProgram(): Promise<void> {
   console.log(`Using program ${programId.toBase58()}`);
 
   // Derive the address (public key) of a greeting account from the program so that it's easy to find later.
-  const GREETING_SEED = 'hello';
+  const GREETING_SEED = 'hello' + getRandomInt(3);
+
+  console.log("Candidate ID:: " + GREETING_SEED);
   greetedPubkey = await PublicKey.createWithSeed(
     payer.publicKey,
     GREETING_SEED,
@@ -204,10 +213,15 @@ export async function checkProgram(): Promise<void> {
  */
 export async function sayHello(): Promise<void> {
   console.log('Saying hello to', greetedPubkey.toBase58());
+
+  let candidateData = {
+    name: "Elthepu"
+  }
+
   const instruction = new TransactionInstruction({
     keys: [{ pubkey: greetedPubkey, isSigner: false, isWritable: true }],
     programId,
-    data: Buffer.alloc(0), // All instructions are hellos
+    data: Buffer.from(JSON.stringify(candidateData))
   });
   await sendAndConfirmTransaction(
     connection,
