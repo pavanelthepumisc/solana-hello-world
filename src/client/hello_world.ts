@@ -64,11 +64,15 @@ class CandidateAccount {
   age = 0;
   experience = 0;
   first_name = '';
-  constructor(fields: { age: number, experience: number, first_name: string } | undefined = undefined) {
+  last_name = '';
+  qualification = '';
+  constructor(fields: { age: number, experience: number, first_name: string, last_name: string, qualification: string } | undefined = undefined) {
     if (fields) {
       this.age = fields.age;
       this.experience = fields.experience;
       this.first_name = fields.first_name;
+      this.last_name = fields.last_name;
+      this.qualification = fields.qualification;
     }
   }
 }
@@ -77,7 +81,7 @@ class CandidateAccount {
  * Borsh schema definition for candidate accounts
  */
 const CandidateSchema = new Map([
-  [CandidateAccount, { kind: 'struct', fields: [['age', 'u32'], ['experience', 'u32'], ['first_name', 'String']] }],
+  [CandidateAccount, { kind: 'struct', fields: [['age', 'u32'], ['experience', 'u32'], ['first_name', 'String'], ['last_name', 'String'], ['qualification', 'String']] }],
 ]);
 
 /**
@@ -216,9 +220,11 @@ export async function sayHello(): Promise<void> {
   console.log('Saying hello to', candidatePubkey.toBase58());
 
   let candidateData = {
-    age: 12,
-    experience: 1,
-    first_name: "Elthepu"
+    age: 13,
+    experience: 11,
+    first_name: "Pavan",
+    last_name: "Elthepu1",
+    qualification: "BTech"
   }
 
   const instruction = new TransactionInstruction({
@@ -254,16 +260,6 @@ export async function getCandidates(): Promise<void> {
   if (accountInfo === null) {
     throw 'Error: cannot find the candidate account';
   }
-  const candidateData = getAcountData(accountInfo.data);
-  console.log(
-    candidatePubkey.toBase58(),
-    'has age ',
-    candidateData.age,
-    " and experience ",
-    candidateData.experience,
-    ' and first_name ',
-    candidateData.first_name,
-  );
 }
 
 function getAcountData(data: Buffer) {

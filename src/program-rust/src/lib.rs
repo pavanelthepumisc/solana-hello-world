@@ -15,6 +15,8 @@ pub struct CandidateAccount {
     pub age: u32,
     pub experience: u32,
     pub first_name: String,
+    pub last_name: String,
+    pub qualification: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -22,6 +24,8 @@ pub struct CandidateData {
     pub age: u32,
     pub experience: u32,
     pub first_name: String,
+    pub last_name: String,
+    pub qualification: String,
 }
 
 // Declare the programs entrypoint. The entrypoint is the function
@@ -72,6 +76,8 @@ pub fn process_instruction(
     candidate.age = candidate_data_json.age;
     candidate.experience = candidate_data_json.experience;
     candidate.first_name = String::from(candidate_data_json.first_name);
+    candidate.last_name = String::from(candidate_data_json.last_name);
+    candidate.qualification = String::from(candidate_data_json.qualification);
     candidate.serialize(&mut &mut account.data.borrow_mut()[..])?;
     Ok(())
 }
