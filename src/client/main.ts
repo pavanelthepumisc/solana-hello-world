@@ -7,7 +7,7 @@ import {
   establishPayer,
   checkProgram,
   sayHello,
-  reportGreetings,
+  getCandidates,
 } from './hello_world';
 
 async function main() {
@@ -26,7 +26,7 @@ async function main() {
   await sayHello();
 
   // Find out how many times that account has been greeted
-  await reportGreetings();
+  await getCandidates();
 
   console.log('Success');
 }

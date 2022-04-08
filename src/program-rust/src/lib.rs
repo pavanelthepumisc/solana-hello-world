@@ -9,22 +9,21 @@ use solana_program::{
 use std::str;
 
 /// The type of state managed by this program. The type defined here
-/// much match the `GreetingAccount` type defined by the client.
+/// much match the `CandidateAccount` type defined by the client.
 #[derive(BorshSerialize, BorshDeserialize, Debug)]
-pub struct GreetingAccount {
-    /// The number of greetings that have been sent to this account.
-    pub counter: u32,
+pub struct CandidateAccount {
+    pub age: u32,
     pub experience: u32,
-    pub name: String,
+    pub first_name: String,
 }
 
 #[derive(Deserialize, Debug)]
 pub struct CandidateData {
-    pub name: String,
+    pub first_name: String,
 }
 
-/// Declare the programs entrypoint. The entrypoint is the function
-/// that will get run when the program is executed.
+// Declare the programs entrypoint. The entrypoint is the function
+// that will get run when the program is executed.
 #[cfg(not(feature = "exclude_entrypoint"))]
 entrypoint!(process_instruction);
 
@@ -32,9 +31,9 @@ entrypoint!(process_instruction);
 /// a single account that is owned by the program as an argument and
 /// no instructions.
 ///
-/// The account passed in ought to contain a `GreetingAccount`. This
-/// program will increment the `counter` value in the
-/// `GreetingAccount` when executed.
+/// The account passed in ought to contain a `CandidateAccount`. This
+/// program will increment the `age` value in the
+/// `CandidateAccount` when executed.
 pub fn process_instruction(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -49,9 +48,9 @@ pub fn process_instruction(
 
     msg!(
         "1 - Hello World Rust program entrypoint {:?}",
-        candidate_data_json.name
+        candidate_data_json.first_name
     );
-    // Get the account that stores greeting count information.
+    // Get the account that stores candidate information.
     let accounts_iter = &mut accounts.iter();
     let account = next_account_info(accounts_iter)?;
 
@@ -62,14 +61,15 @@ pub fn process_instruction(
         return Err(ProgramError::IncorrectProgramId);
     }
 
-    // Deserialize the greeting information from the account, modify
+    // Deserialize the candidate information from the account, modify
     // it, and then write it back.
-    // let mut greeting = GreetingAccount::try_from_slice(&account.data.borrow())?;
-    let mut greeting =
-        solana_program::borsh::try_from_slice_unchecked::<GreetingAccount>(&account.data.borrow())?;
-    greeting.counter += 1;
-    greeting.experience += 11;
-    greeting.name = String::from(candidate_data_json.name);
-    greeting.serialize(&mut &mut account.data.borrow_mut()[..])?;
+    // let mut candidate = CandidateAccount::try_from_slice(&account.data.borrow())?;
+    let mut candidate = solana_program::borsh::try_from_slice_unchecked::<CandidateAccount>(
+        &account.data.borrow(),
+    )?;
+    candidate.age += 1;
+    candidate.experience += 11;
+    candidate.first_name = String::from(candidate_data_json.first_name);
+    candidate.serialize(&mut &mut account.data.borrow_mut()[..])?;
     Ok(())
 }
