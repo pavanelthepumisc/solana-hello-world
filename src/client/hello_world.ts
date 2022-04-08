@@ -216,6 +216,8 @@ export async function sayHello(): Promise<void> {
   console.log('Saying hello to', candidatePubkey.toBase58());
 
   let candidateData = {
+    age: 12,
+    experience: 1,
     first_name: "Elthepu"
   }
 

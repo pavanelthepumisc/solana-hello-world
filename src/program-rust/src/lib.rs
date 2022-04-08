@@ -19,6 +19,8 @@ pub struct CandidateAccount {
 
 #[derive(Deserialize, Debug)]
 pub struct CandidateData {
+    pub age: u32,
+    pub experience: u32,
     pub first_name: String,
 }
 
@@ -67,8 +69,8 @@ pub fn process_instruction(
     let mut candidate = solana_program::borsh::try_from_slice_unchecked::<CandidateAccount>(
         &account.data.borrow(),
     )?;
-    candidate.age += 1;
-    candidate.experience += 11;
+    candidate.age = candidate_data_json.age;
+    candidate.experience = candidate_data_json.experience;
     candidate.first_name = String::from(candidate_data_json.first_name);
     candidate.serialize(&mut &mut account.data.borrow_mut()[..])?;
     Ok(())
