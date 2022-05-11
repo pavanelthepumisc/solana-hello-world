@@ -5,6 +5,7 @@ use solana_program::{
     entrypoint, msg,
     program_error::ProgramError,
     pubkey::Pubkey,
+    sysvar::{clock::Clock, Sysvar},
 };
 use std::str;
 
@@ -17,6 +18,7 @@ pub struct CandidateAccount {
     pub first_name: String,
     pub last_name: String,
     pub qualification: String,
+    pub timestamp: i64,
 }
 
 #[derive(Deserialize, Debug)]
@@ -26,6 +28,7 @@ pub struct CandidateData {
     pub first_name: String,
     pub last_name: String,
     pub qualification: String,
+    pub timestamp: i64,
 }
 
 // Declare the programs entrypoint. The entrypoint is the function
@@ -78,6 +81,7 @@ pub fn process_instruction(
     candidate.first_name = String::from(candidate_data_json.first_name);
     candidate.last_name = String::from(candidate_data_json.last_name);
     candidate.qualification = String::from(candidate_data_json.qualification);
+    candidate.timestamp = Clock::get().unwrap().unix_timestamp;
     candidate.serialize(&mut &mut account.data.borrow_mut()[..])?;
     Ok(())
 }
