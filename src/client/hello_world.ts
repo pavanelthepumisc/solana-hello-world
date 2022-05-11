@@ -15,6 +15,8 @@ import {
 import fs from 'mz/fs';
 import path from 'path';
 import * as borsh from 'borsh';
+var Base58 = require('base-58');
+const spl = require('@solana/spl-token');
 
 import { getPayer, getRpcUrl, createKeypairFromFile } from './utils';
 
@@ -66,13 +68,15 @@ class CandidateAccount {
   first_name = '';
   last_name = '';
   qualification = '';
-  constructor(fields: { age: number, experience: number, first_name: string, last_name: string, qualification: string } | undefined = undefined) {
+  timestamp: any;
+  constructor(fields: { age: number, experience: number, first_name: string, last_name: string, timestamp: string, qualification: string } | undefined = undefined) {
     if (fields) {
       this.age = fields.age;
       this.experience = fields.experience;
       this.first_name = fields.first_name;
       this.last_name = fields.last_name;
       this.qualification = fields.qualification;
+      this.timestamp = fields.timestamp;
     }
   }
 }
@@ -81,7 +85,7 @@ class CandidateAccount {
  * Borsh schema definition for candidate accounts
  */
 const CandidateSchema = new Map([
-  [CandidateAccount, { kind: 'struct', fields: [['age', 'u32'], ['experience', 'u32'], ['first_name', 'String'], ['last_name', 'String'], ['qualification', 'String']] }],
+  [CandidateAccount, { kind: 'struct', fields: [['age', 'u32'], ['experience', 'u32'], ['first_name', 'String'], ['last_name', 'String'], ['qualification', 'String'], ['timestamp', 'u64']] }],
 ]);
 
 /**
@@ -124,7 +128,7 @@ export async function establishPayer(): Promise<void> {
     // If current balance is not enough to pay for fees, request an airdrop
     const sig = await connection.requestAirdrop(
       payer.publicKey,
-      fees - lamports,
+      10,
     );
     await connection.confirmTransaction(sig);
     lamports = await connection.getBalance(payer.publicKey);
@@ -222,9 +226,10 @@ export async function sayHello(): Promise<void> {
   let candidateData = {
     age: 13,
     experience: 11,
-    first_name: "Pavan",
+    first_name: "Pavan1",
     last_name: "Elthepu1",
-    qualification: "BTech"
+    qualification: "BTech",
+    timestamp: Date.now()
   }
 
   const instruction = new TransactionInstruction({
@@ -244,17 +249,25 @@ export async function sayHello(): Promise<void> {
  */
 export async function getCandidates(): Promise<void> {
   // Get all transactions of an account
-  const transSignatures = await getTransactionsOfUser(programId);
 
   // Get all accounts
   const accounts = await connection.getProgramAccounts(programId);
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
-    console.log(account.pubkey + "^^^^^^^^^^", getAcountData(account.account.data));
+    const accountData = getAcountData(account.account.data);
+    console.log(account.pubkey + "^^^^^^^^^^", accountData);
   }
 
-  // console.log("Transactions for " + candidatePubkey);
-  // console.log({ transSignatures });
+  console.log("Transactions for " + candidatePubkey);
+  let aa = "F6RcF1vtAHRS3aBhubUmJ5WFeafZp8L9mff2S3wtS8Fw";
+  const transSignatures = await getTransactionsOfUser(new PublicKey(aa));
+  for (let i = 0; i < transSignatures.length; i++) {
+    let base58EncodedData = transSignatures[i].transaction.message.instructions[0].data;
+
+    var base58DecodedData = Base58.decode(base58EncodedData);
+    var buff = Buffer.from(base58DecodedData);
+    console.log(buff.toString('utf8'));
+  }
 
   const accountInfo = await connection.getAccountInfo(candidatePubkey);
   if (accountInfo === null) {
