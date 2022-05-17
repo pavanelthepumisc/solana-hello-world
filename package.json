@@ -23,6 +23,7 @@
     "pretty": "prettier --write '{,src/**/}*.ts'"
   },
   "dependencies": {
+    "@solana/buffer-layout": "^4.0.0",
     "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.33.0",
     "base-58": "0.0.1",

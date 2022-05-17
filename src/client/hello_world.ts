@@ -11,14 +11,16 @@ import {
   Transaction,
   sendAndConfirmTransaction,
   ConfirmedSignaturesForAddress2Options,
+  clusterApiUrl
 } from '@solana/web3.js';
 import fs from 'mz/fs';
 import path from 'path';
 import * as borsh from 'borsh';
 var Base58 = require('base-58');
-const spl = require('@solana/spl-token');
 
 import { getPayer, getRpcUrl, createKeypairFromFile } from './utils';
+
+import { createAssociatedTokenAccount, TOKEN_PROGRAM_ID, createTransferInstruction, createMint, getAccount, getOrCreateAssociatedTokenAccount, mintToChecked } from '@solana/spl-token'
 
 /**
  * Connection to the network
@@ -244,9 +246,83 @@ export async function sayHello(): Promise<void> {
   );
 }
 
-/**
- * Report the number of times the candidate account has been said hello to
- */
+export async function getPhenalTokens(): Promise<void> {
+
+  console.log("=================1");
+  // Initialise Solana connection
+  const endpoint = "https://api.devnet.solana.com";
+  const connection = new Connection(endpoint)
+  // Initialise shop account
+  const shopPrivateKey = [176, 80, 11, 129, 218, 105, 198, 138, 54, 70, 121, 110, 84, 238, 108, 210, 68, 217, 104, 140, 18, 138, 254, 8, 195, 57, 185, 84, 253, 161, 200, 205, 4, 0, 93, 237, 3, 44, 140, 44, 101, 87, 228, 106, 191, 48, 119, 245, 49, 194, 203, 43, 215, 135, 212, 80, 105, 42, 224, 31, 8, 102, 92, 227]
+  console.log("=================2");
+  // if (!shopPrivateKey) {
+  //   throw new Error('SHOP_PRIVATE_KEY not set')
+  // }
+  let seed = Uint8Array.from(shopPrivateKey).slice(0, 32);
+  console.log("=================3");
+  const fromWallet = Keypair.fromSeed(seed)
+  //const shopAccount = Keypair.generate();
+  var fromAirdropSignature = await connection.requestAirdrop(
+    fromWallet.publicKey,
+    LAMPORTS_PER_SOL,
+  );
+  // Wait for airdrop confirmation
+  await connection.confirmTransaction(fromAirdropSignature);
+  console.log("airdrop done");
+  const mintPubkey = new PublicKey("ErdkWPCAJP3cXH56ZeRCPqpHkJFtNyF3gPuEjxkwwgBq");
+  // Create the associated token account for the shop
+  console.log("Creating token account for the shop...")
+  const fromTokenAccount = await getOrCreateAssociatedTokenAccount(
+    connection,
+    fromWallet, // payer
+    mintPubkey, // token
+    fromWallet.publicKey, // who to create an account for
+  )
+  console.log("Token account created:", fromTokenAccount.toString())
+  const toTokenAccount = await getOrCreateAssociatedTokenAccount(
+    connection,
+    fromWallet, // payer
+    mintPubkey, // token
+    new PublicKey("5p1LC8Ld2cznJHFcXco78TucjGsf1dBfoLCRhxAwL1Qx")
+  );
+
+  // Mint 1 million coupons to the shop account
+  console.log("Minting 1 million coupons to the shop account...")
+  await mintToChecked(
+    connection,
+    fromWallet, // payer
+    mintPubkey, // token
+    fromTokenAccount.address, // recipient
+    fromWallet, // authority to mint
+    1000000000, // amount
+    9//decimals
+  )
+  console.log("Minted 1 million coupons to the shop account")
+  const { amount } = await getAccount(connection, fromTokenAccount.address)
+  console.log({
+    mintPubkey: mintPubkey.toString(),
+    balance: amount.toLocaleString(),
+  })
+  console.log("transferring phenal");
+  const transaction = new Transaction().add(
+    createTransferInstruction(
+      fromTokenAccount.address,
+      toTokenAccount.address,
+      fromWallet.publicKey,
+      1000000000,
+      []
+    ),
+  );
+  // Sign transaction, broadcast, and confirm
+  await sendAndConfirmTransaction(
+    connection,
+    transaction,
+    [fromWallet]
+  );
+  console.log("transferring phenal done");
+
+}
+
 export async function getCandidates(): Promise<void> {
   // Get all transactions of an account
 

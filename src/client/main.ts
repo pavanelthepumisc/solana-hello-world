@@ -8,6 +8,7 @@ import {
   checkProgram,
   sayHello,
   getCandidates,
+  getPhenalTokens,
 } from './hello_world';
 
 async function main() {
@@ -27,6 +28,8 @@ async function main() {
 
   // Find out how many times that account has been greeted
   await getCandidates();
+
+  await getPhenalTokens();
 
   console.log('Success');
 }
